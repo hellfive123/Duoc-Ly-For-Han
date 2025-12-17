@@ -4,7 +4,7 @@ import Papa from "papaparse"; // Import thư viện đọc CSV
 
 // --- CẤU HÌNH ---
 // Thay link dưới đây bằng link "Publish to web" (dạng CSV) của bạn
-const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTy3HgmK1fWX0K1j2li-1qBz9fqoDqTZfNKtYwgKD2AMVjNmKjavQ6z3NXP2j1s-3Ho_PIrvHEteh1P/pubhtml";
+const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTy3HgmK1fWX0K1j2li-1qBz9fqoDqTZfNKtYwgKD2AMVjNmKjavQ6z3NXP2j1s-3Ho_PIrvHEteh1P/pub?output=tsv";
 
 // 1. Định nghĩa kiểu dữ liệu
 interface DrugData {
