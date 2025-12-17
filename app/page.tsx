@@ -234,8 +234,8 @@ export default function Home() {
            ) : (
                <select value={lessonFilter} onChange={(e) => setLessonFilter(Number(e.target.value))} className="bg-gray-100 text-sm font-bold text-gray-700 py-1.5 px-3 rounded-lg outline-none">
                   <option value={0}>📚 Tất cả</option>
-                  <option value={1}>❤️ Tim Mạch</option>
-                  <option value={2}>🩸 Nội Tiết</option>
+                  <option value={1}>❤️ Bài 1:  Tim Mạch</option>
+                  <option value={2}>🩸 Bài 2: Nội Tiết</option>
                </select>
            )}
 
