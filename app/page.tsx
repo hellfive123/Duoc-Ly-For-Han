@@ -1,8 +1,20 @@
 "use client";
 import { useState, useEffect } from "react";
 
+// 1. Định nghĩa kiểu dữ liệu cho thuốc để TypeScript hiểu
+interface DrugData {
+  hc: string;
+  bd: string;
+  ndl: string;
+  coche: string;
+  cd: string;
+  tdp: string;
+  ccd: string;
+  [key: string]: string; // Dòng này cho phép truy cập động (ví dụ: data['cd'])
+}
+
 // Dữ liệu thuốc Bài 1 & 2
-const database = [
+const database: DrugData[] = [
   // --- BÀI 1: TIM MẠCH ---
   {
     hc: "Acetazolamid",
@@ -216,9 +228,11 @@ const database = [
 ];
 
 export default function Home() {
-  const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [hintType, setHintType] = useState(""); // 'cd', 'tdp', 'ccd'
+  // 2. Định nghĩa kiểu dữ liệu cho state
+  const [currentQuestion, setCurrentQuestion] = useState<DrugData | null>(null);
+  const [hintType, setHintType] = useState<string>(""); 
   const [showAnswer, setShowAnswer] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
 
   // Hàm random thuốc và gợi ý
@@ -244,7 +258,7 @@ export default function Home() {
   }, []);
 
   // Map mã gợi ý sang tên hiển thị
-  const getHintLabel = (type) => {
+  const getHintLabel = (type: string) => {
     switch (type) {
       case "cd": return "CHỈ ĐỊNH";
       case "tdp": return "TÁC DỤNG PHỤ";
