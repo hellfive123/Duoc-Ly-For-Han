@@ -158,10 +158,14 @@ export default function Home() {
           
           <div className="space-y-2 text-center mt-2">
             <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-bold tracking-widest uppercase mb-1">
-              Hoạt chất
+              Hoạt chất & Biệt dược
             </span>
-            <h2 className="text-4xl font-black text-gray-800 break-words tracking-tight">
+            <h2 className="text-3xl font-black text-gray-800 break-words tracking-tight leading-tight">
               {currentQuestion.hc}
+              {/* Thêm biệt dược bên dưới với màu khác cho dễ nhìn */}
+              <span className="block text-xl text-indigo-600 font-bold mt-1">
+                ({currentQuestion.bd})
+              </span>
             </h2>
           </div>
 
