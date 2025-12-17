@@ -314,8 +314,9 @@ export default function Home() {
           <div className="space-y-4">
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nhóm Dược Lý (?)</label>
+              {/* Đã thêm text-gray-900 vào className bên dưới */}
               <textarea 
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${showAnswer ? (userNdl ? 'bg-gray-50' : 'bg-red-50 border-red-200') : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'}`}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:outline-none transition-colors text-gray-900 ${showAnswer ? (userNdl ? 'bg-gray-50' : 'bg-red-50 border-red-200') : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'}`}
                 placeholder="Nhập nhóm dược lý..."
                 rows={2}
                 value={userNdl}
@@ -325,8 +326,9 @@ export default function Home() {
             </div>
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-500 uppercase ml-1">Cơ Chế (?)</label>
+              {/* Đã thêm text-gray-900 vào className bên dưới */}
               <textarea 
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${showAnswer ? (userCoche ? 'bg-gray-50' : 'bg-red-50 border-red-200') : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'}`}
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:outline-none transition-colors text-gray-900 ${showAnswer ? (userCoche ? 'bg-gray-50' : 'bg-red-50 border-red-200') : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'}`}
                 placeholder="Nhập cơ chế tác dụng..."
                 rows={3}
                 value={userCoche}
