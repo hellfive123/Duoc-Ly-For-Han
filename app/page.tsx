@@ -1,5 +1,10 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import Papa from "papaparse"; // Import thư viện đọc CSV
+
+// --- CẤU HÌNH ---
+// Thay link dưới đây bằng link "Publish to web" (dạng CSV) của bạn
+const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTy3HgmK1fWX0K1j2li-1qBz9fqoDqTZfNKtYwgKD2AMVjNmKjavQ6z3NXP2j1s-3Ho_PIrvHEteh1P/pubhtml";
 
 // 1. Định nghĩa kiểu dữ liệu
 interface DrugData {
@@ -10,59 +15,74 @@ interface DrugData {
   cd: string;
   tdp: string;
   ccd: string;
-  lesson: number; // Thêm trường bài học
+  lesson: number; 
   [key: string]: string | number;
 }
 
-// Dữ liệu thuốc (Đã thêm trường lesson)
-const database: DrugData[] = [
-  // --- BÀI 1: TIM MẠCH ---
-  { lesson: 1, hc: "Acetazolamid", bd: "Acetazolamid", ndl: "Lợi tiểu ức chế Carbonic Anhydrase", coche: "Ức chế tái hấp thu Na+, HCO3-", cd: "H/C độ cao cấp, Tăng nhãn áp", tdp: "Nước tiểu nhiễm kiềm", ccd: "Nhiễm acid máu" },
-  { lesson: 1, hc: "Furosemid", bd: "Lasix", ndl: "Lợi tiểu quai", coche: "Ức chế đồng vận chuyển Na+, K+, 2Cl-", cd: "Phù phổi cấp, THA", tdp: "Giảm K+ máu, Giảm V máu", ccd: "Tiền hôn mê gan" },
-  { lesson: 1, hc: "Indapamid", bd: "Natrilix SR", ndl: "Lợi tiểu Thiazid", coche: "Ức chế đồng vận chuyển Na+, Cl-", cd: "THA, Phù", tdp: "Giảm Na+, K+ máu", ccd: "Suy thận nặng" },
-  { lesson: 1, hc: "Spironolacton", bd: "Verospiron", ndl: "Lợi tiểu tiết kiệm Kali", coche: "Đối kháng Aldosteron", cd: "THA, Cường Aldosteron", tdp: "Tăng K+ máu, Vú to ở nam", ccd: "Tăng K+ máu" },
-  { lesson: 1, hc: "Propranolol", bd: "Dorocardyl", ndl: "Chẹn Beta không chọn lọc", coche: "Chẹn Beta 1, Beta 2", cd: "Cường giáp, Run tay, THA", tdp: "Hen suyễn, Tim chậm", ccd: "Hen phế quản" },
-  { lesson: 1, hc: "Atenolol", bd: "Atenolol", ndl: "Chẹn Beta 1 chọn lọc", coche: "Chẹn chọn lọc Beta 1", cd: "THA, Đau thắt ngực", tdp: "Mệt mỏi, lạnh đầu chi", ccd: "Suy tim mất bù" },
-  { lesson: 1, hc: "Captopril", bd: "Captopril", ndl: "ACEi (Ức chế men chuyển)", coche: "Ức chế men chuyển Angiotensin I -> II", cd: "THA, Suy tim", tdp: "Ho khan, Phù mạch", ccd: "Hẹp ĐM thận 2 bên" },
-  { lesson: 1, hc: "Amlodipin", bd: "Amlor", ndl: "Chẹn kênh Calci (DHP)", coche: "Chẹn dòng Ca2+ vào tế bào", cd: "THA, Đau thắt ngực", tdp: "Phù chân, Đỏ bừng mặt", ccd: "Suy tim, Hẹp ĐM chủ" },
-  { lesson: 1, hc: "Nitroglycerin", bd: "Nitrostad", ndl: "Nitrat hữu cơ", coche: "Tạo NO gây giãn mạch", cd: "Cắt cơn đau thắt ngực", tdp: "Đau đầu, Hạ HA", ccd: "Tăng áp lực nội sọ" },
-  { lesson: 1, hc: "Digoxin", bd: "Digoxin", ndl: "Glycosid tim", coche: "Ức chế bơm Na-K-ATPase", cd: "Suy tim, Rung nhĩ", tdp: "Loạn thị giác (nhìn màu vàng)", ccd: "Block nhĩ thất, Nhịp chậm" },
-  { lesson: 1, hc: "Atorvastatin", bd: "Lipitor", ndl: "Statin", coche: "Ức chế HMG-CoA Reductase", cd: "Rối loạn lipid máu", tdp: "Đau cơ, Tăng men gan", ccd: "Bệnh gan tiến triển" },
-
-  // --- BÀI 2: NỘI TIẾT ---
-  { lesson: 2, hc: "Insulin", bd: "Novolin / Mixtard", ndl: "Hormon tuyến tụy", coche: "Tăng sử dụng Glucose ở tế bào", cd: "ĐTĐ type 1, ĐTĐ thai kỳ", tdp: "Hạ đường huyết", ccd: "Đang bị hạ đường huyết" },
-  { lesson: 2, hc: "Metformin", bd: "Glucophage", ndl: "Biguanid", coche: "Giảm tân tạo đường ở gan", cd: "ĐTĐ type 2 (ưu tiên)", tdp: "Rối loạn tiêu hóa, Acid lactic", ccd: "Suy thận, Suy gan" },
-  { lesson: 2, hc: "Gliclazid", bd: "Diamicron", ndl: "Sulfonylure", coche: "Kích thích tụy tiết Insulin", cd: "ĐTĐ type 2", tdp: "Hạ đường huyết, Tăng cân", ccd: "ĐTĐ type 1" },
-  { lesson: 2, hc: "Levonorgestrel", bd: "Postinor", ndl: "Progestin", coche: "Ức chế rụng trứng", cd: "Tránh thai khẩn cấp", tdp: "RL kinh nguyệt", ccd: "Đang mang thai" },
-  { lesson: 2, hc: "Prednison", bd: "Corticoid", ndl: "Glucocorticoid", coche: "Ức chế Phospholipase A2", cd: "Kháng viêm, Ức chế miễn dịch", tdp: "Hội chứng Cushing, Loét dạ dày", ccd: "Loét dạ dày, Nhiễm nấm" },
-  { lesson: 2, hc: "Levothyroxin", bd: "Berlthyrox", ndl: "Hormon tuyến giáp", coche: "Bổ sung T4", cd: "Suy giáp", tdp: "Cường giáp (nếu quá liều)", ccd: "Nhồi máu cơ tim cấp" },
-  { lesson: 2, hc: "Carbimazol", bd: "Neo-Mercazole", ndl: "Kháng giáp tổng hợp", coche: "Ức chế tổng hợp hormon giáp", cd: "Cường giáp (Basedow)", tdp: "Giảm bạch cầu hạt", ccd: "Suy gan nặng" },
-];
-
 export default function Home() {
+  const [database, setDatabase] = useState<DrugData[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<DrugData | null>(null);
   const [hintType, setHintType] = useState<string>(""); 
   const [showAnswer, setShowAnswer] = useState(false);
   
-  // State mới
+  // State UI
   const [userNdl, setUserNdl] = useState("");
   const [userCoche, setUserCoche] = useState("");
-  const [lessonFilter, setLessonFilter] = useState<number>(0); // 0 = Tất cả
-  const [streak, setStreak] = useState(0); // Chuỗi đúng
+  const [lessonFilter, setLessonFilter] = useState<number>(0);
+  const [streak, setStreak] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Lọc dữ liệu theo bài
+  // --- FETCH DỮ LIỆU TỪ GOOGLE SHEET ---
+  useEffect(() => {
+    setIsLoading(true);
+    Papa.parse(GOOGLE_SHEET_CSV_URL, {
+      download: true,
+      header: true, // Tự động map dòng 1 thành key
+      complete: (results) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawData: any[] = results.data;
+        
+        // Lọc bỏ các dòng trống và convert lesson sang number
+        const cleanData: DrugData[] = rawData
+          .filter(row => row.hc && row.hc.trim() !== "") // Bỏ dòng trống
+          .map(row => ({
+            ...row,
+            lesson: Number(row.lesson) || 1 // Mặc định bài 1 nếu quên nhập
+          }));
+
+        if (cleanData.length > 0) {
+          setDatabase(cleanData);
+          // Random câu đầu tiên sau khi load xong
+          generateRandomQuestion(cleanData); 
+        } else {
+          setError("Không tìm thấy dữ liệu trong Sheet.");
+        }
+        setIsLoading(false);
+      },
+      error: (err) => {
+        setError("Lỗi tải dữ liệu: " + err.message);
+        setIsLoading(false);
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Lọc dữ liệu theo bài (Dựa trên database đã fetch)
   const filteredDatabase = useMemo(() => {
     if (lessonFilter === 0) return database;
     return database.filter(d => d.lesson === lessonFilter);
-  }, [lessonFilter]);
+  }, [lessonFilter, database]);
 
-  const generateQuestion = () => {
+  // Hàm random tách riêng để tái sử dụng
+  const generateRandomQuestion = (sourceData: DrugData[]) => {
+    if (sourceData.length === 0) return;
+
     setShowAnswer(false);
     setUserNdl("");
     setUserCoche("");
     
-    // Random từ danh sách đã lọc
-    const randomDrug = filteredDatabase[Math.floor(Math.random() * filteredDatabase.length)];
+    const randomDrug = sourceData[Math.floor(Math.random() * sourceData.length)];
     
     const types = ["cd", "tdp", "ccd"];
     const randomType = types[Math.floor(Math.random() * types.length)];
@@ -71,21 +91,28 @@ export default function Home() {
     setHintType(randomType);
   };
 
+  // Wrapper gọi hàm random
+  const nextQuestion = () => {
+    generateRandomQuestion(filteredDatabase);
+  };
+
   // Reset streak khi đổi bài
   useEffect(() => {
     setStreak(0);
-    generateQuestion();
+    if (database.length > 0) {
+        generateRandomQuestion(filteredDatabase);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonFilter]);
 
   const handleCorrect = () => {
     setStreak(s => s + 1);
-    generateQuestion();
+    nextQuestion();
   }
 
   const handleIncorrect = () => {
     setStreak(0);
-    generateQuestion();
+    nextQuestion();
   }
 
   const getHintLabel = (type: string) => {
@@ -97,7 +124,10 @@ export default function Home() {
     }
   };
 
-  if (!currentQuestion) return <div className="p-10 text-center">Đang tải dữ liệu...</div>;
+  // --- GIAO DIỆN ---
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center text-blue-600 font-bold">⏳ Đang tải dữ liệu từ Google Sheets...</div>;
+  if (error) return <div className="min-h-screen flex items-center justify-center text-red-600 font-bold px-4 text-center">{error}</div>;
+  if (!currentQuestion) return <div className="p-10 text-center">Chưa có dữ liệu.</div>;
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center p-4 font-sans pb-20">
@@ -225,7 +255,7 @@ export default function Home() {
       </div>
       
       <p className="mt-6 text-xs text-gray-400 text-center">
-        OnTapDuocLy v2.0 • Made with ❤️
+        Dữ liệu từ Google Sheets • Made with ❤️
       </p>
     </main>
   );
