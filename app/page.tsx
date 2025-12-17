@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-// 1. Định nghĩa kiểu dữ liệu cho thuốc để TypeScript hiểu
+// 1. Định nghĩa kiểu dữ liệu
 interface DrugData {
   hc: string;
   bd: string;
@@ -10,7 +10,7 @@ interface DrugData {
   cd: string;
   tdp: string;
   ccd: string;
-  [key: string]: string; // Dòng này cho phép truy cập động (ví dụ: data['cd'])
+  [key: string]: string;
 }
 
 // Dữ liệu thuốc Bài 1 & 2
@@ -228,22 +228,26 @@ const database: DrugData[] = [
 ];
 
 export default function Home() {
-  // 2. Định nghĩa kiểu dữ liệu cho state
   const [currentQuestion, setCurrentQuestion] = useState<DrugData | null>(null);
   const [hintType, setHintType] = useState<string>(""); 
   const [showAnswer, setShowAnswer] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(true);
 
-  // Hàm random thuốc và gợi ý
+  // Thêm state lưu nội dung người dùng nhập
+  const [userNdl, setUserNdl] = useState("");
+  const [userCoche, setUserCoche] = useState("");
+
   const generateQuestion = () => {
     setIsLoading(true);
     setShowAnswer(false);
+    // Reset ô nhập liệu
+    setUserNdl("");
+    setUserCoche("");
     
-    // Random thuốc
     const randomDrug = database[Math.floor(Math.random() * database.length)];
     
-    // Random loại gợi ý (1 trong 3)
+    // Random gợi ý
     const types = ["cd", "tdp", "ccd"];
     const randomType = types[Math.floor(Math.random() * types.length)];
     
@@ -257,7 +261,6 @@ export default function Home() {
     generateQuestion();
   }, []);
 
-  // Map mã gợi ý sang tên hiển thị
   const getHintLabel = (type: string) => {
     switch (type) {
       case "cd": return "CHỈ ĐỊNH";
@@ -270,76 +273,114 @@ export default function Home() {
   if (!currentQuestion) return <div className="p-10 text-center">Loading...</div>;
 
   return (
-    <main className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden">
+    <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 font-sans">
+      <div className="w-full max-w-xl bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
         
         {/* Header */}
-        <div className="bg-blue-600 p-4 text-white text-center">
-          <h1 className="text-xl font-bold uppercase">Ôn Tập Dược Lý (Bài 1 & 2)</h1>
-          <p className="text-sm opacity-90">Tổng số thuốc: {database.length}</p>
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-5 text-white text-center shadow-sm">
+          <h1 className="text-2xl font-bold uppercase tracking-wide">Ôn Tập Dược Lý</h1>
+          <p className="text-xs opacity-80 mt-1">Bài 1 & 2 • {database.length} Thuốc</p>
         </div>
 
         {/* Question Section */}
         <div className="p-6 space-y-6">
           
-          {/* Hoạt chất (Đề cho) */}
+          {/* Đề bài: Hoạt chất */}
           <div className="space-y-2 text-center">
-            <span className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold tracking-wide">
-              ĐỀ CHO HOẠT CHẤT
+            <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold tracking-wider mb-2">
+              HOẠT CHẤT CẦN NHỚ
             </span>
-            <h2 className="text-3xl font-extrabold text-gray-800 break-words">
+            <h2 className="text-4xl font-extrabold text-gray-800 break-words drop-shadow-sm">
               {currentQuestion.hc}
             </h2>
           </div>
 
-          {/* Random Hint (Đề cho 1 trong 3) */}
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-bold text-yellow-600 uppercase">
+          {/* Gợi ý ngẫu nhiên */}
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg shadow-sm">
+            <div className="flex items-center gap-2 mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-xs font-bold text-yellow-700 uppercase">
                 Gợi ý ({getHintLabel(hintType)})
               </span>
             </div>
-            <p className="text-gray-700 font-medium">
+            <p className="text-gray-800 font-medium leading-relaxed">
               {currentQuestion[hintType]}
             </p>
           </div>
 
-          <hr className="border-gray-200" />
+          {/* Form nhập liệu của người dùng */}
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nhóm Dược Lý (?)</label>
+              <textarea 
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${showAnswer ? (userNdl ? 'bg-gray-50' : 'bg-red-50 border-red-200') : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'}`}
+                placeholder="Nhập nhóm dược lý..."
+                rows={2}
+                value={userNdl}
+                onChange={(e) => setUserNdl(e.target.value)}
+                readOnly={showAnswer} // Khóa không cho sửa khi đã hiện đáp án
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-gray-500 uppercase ml-1">Cơ Chế (?)</label>
+              <textarea 
+                className={`w-full p-3 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${showAnswer ? (userCoche ? 'bg-gray-50' : 'bg-red-50 border-red-200') : 'border-gray-300 focus:ring-blue-400 focus:border-blue-400'}`}
+                placeholder="Nhập cơ chế tác dụng..."
+                rows={3}
+                value={userCoche}
+                onChange={(e) => setUserCoche(e.target.value)}
+                readOnly={showAnswer}
+              />
+            </div>
+          </div>
 
-          {/* Phần trả lời (Che/Hiện) */}
-          <div className={`space-y-4 transition-all duration-300 ${showAnswer ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
-            <div>
-              <p className="text-xs text-gray-400 font-bold uppercase">Biệt Dược</p>
-              <p className="text-lg font-semibold text-blue-600">{currentQuestion.bd}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-400 font-bold uppercase">Nhóm Dược Lý</p>
-              <p className="text-lg font-semibold text-purple-600">{currentQuestion.ndl}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-400 font-bold uppercase">Cơ Chế</p>
-              <p className="text-md text-gray-700">{currentQuestion.coche}</p>
+          <hr className="border-gray-100" />
+
+          {/* Phần hiển thị đáp án đúng (So sánh) */}
+          <div className={`transition-all duration-500 ease-in-out ${showAnswer ? 'opacity-100 max-h-[500px]' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+            <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">✓</span>
+                 <h3 className="font-bold text-blue-800 uppercase text-sm">Đáp Án Chuẩn</h3>
+              </div>
+              
+              <div className="grid gap-3 text-sm">
+                 <div>
+                    <span className="font-bold text-gray-500 text-xs block mb-1">BIỆT DƯỢC</span>
+                    <p className="text-gray-900 font-semibold">{currentQuestion.bd}</p>
+                 </div>
+                 <div>
+                    <span className="font-bold text-gray-500 text-xs block mb-1">NHÓM DƯỢC LÝ</span>
+                    <p className="text-purple-700 font-bold">{currentQuestion.ndl}</p>
+                 </div>
+                 <div>
+                    <span className="font-bold text-gray-500 text-xs block mb-1">CƠ CHẾ</span>
+                    <p className="text-gray-800">{currentQuestion.coche}</p>
+                 </div>
+              </div>
             </div>
           </div>
 
         </div>
 
         {/* Footer Buttons */}
-        <div className="bg-gray-50 p-4 flex gap-3 border-t">
+        <div className="bg-gray-50 p-5 border-t border-gray-100">
           {!showAnswer ? (
             <button 
               onClick={() => setShowAnswer(true)}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition shadow-md"
+              className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all shadow-md active:scale-[0.98]"
             >
-              Hiện Đáp Án
+              Kiểm Tra Đáp Án
             </button>
           ) : (
             <button 
               onClick={generateQuestion}
-              className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition shadow-md flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              Câu Tiếp Theo
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+              <span>Câu Tiếp Theo</span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>
             </button>
@@ -347,8 +388,8 @@ export default function Home() {
         </div>
       </div>
       
-      <p className="mt-6 text-xs text-gray-400">
-        Dữ liệu từ Bài 1 & 2 - Dược Lý
+      <p className="mt-8 text-xs text-gray-400 text-center max-w-xs">
+        Mẹo: Hãy cố gắng tự nhớ và ghi ra trước khi xem đáp án để nhớ lâu hơn.
       </p>
     </main>
   );
